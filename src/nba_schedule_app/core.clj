@@ -1,7 +1,6 @@
 (ns nba-schedule-app.core
   (:require [clojure.string :as str]
             [clj-http.client :as client]
-            [cheshire.core :as json]
             [clj-time.local :as local])
   (:gen-class))
 
@@ -16,7 +15,7 @@
 (defn get-schedule [date]
   "queries stats.nba.com and returns the body of the response json parsed as a vector"
   (let [url (str/replace url-template #"%" date)]
-    (json/parse-string (:body (client/get url)))))
+    (client/json-decode (:body (client/get url)))))
 
 
 (defn map-names [schedule]
@@ -38,8 +37,9 @@
     (add-teams west headers teams)
   @teams))
 
-(defn get-games [schedule]
+(defn get-games [date]
   (let [matchups (atom [])
+        schedule (get (get-schedule date) "resultSets")
         team-ids (team-id-map schedule)
         games (get (map-names schedule) "GameHeader")
         headers (get games "headers")]
@@ -50,13 +50,20 @@
              status "GAME_STATUS_TEXT"
              tv "NATL_TV_BROADCASTER_ABBREVIATION"} matchup-data
             {home home-id visit visitor-id} team-ids]
-        (swap! matchups conj [visit "@" home status (or tv "local")])))
+        (swap! matchups conj [visit "@" home status (or tv "Local TV")])))
     @matchups))
 
 
-(def schedule (get (get-schedule (today)) "resultSets"))
 
 (defn -main
-  [& args]
-  (println (get-games schedule)))
+
+  ([]
+   (let [games (get-games (today))]
+     (doseq [g games]
+       (println g))))
+          
+  ([& args]
+   (let [games (get-games (first args))]
+     (doseq [g games]
+       (println g)))))
 
