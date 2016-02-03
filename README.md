@@ -1,36 +1,20 @@
 # nba-schedule-app
 
-FIXME: description
+An app to show NBA game schedules
 
 ## Installation
 
-Download from http://example.com/FIXME.
+Don't install me yet!
 
 ## Usage
 
-FIXME: explanation
-
-    $ java -jar nba-schedule-app-0.1.0-standalone.jar [args]
+There will be usage!
 
 ## Options
 
-FIXME: listing of options this app accepts.
+You haven't any options yet.
 
 ## Examples
 
-...
+There will be examples.
 
-### Bugs
-
-...
-
-### Any Other Sections
-### That You Think
-### Might be Useful
-
-## License
-
-Copyright © 2016 FIXME
-
-Distributed under the Eclipse Public License either version 1.0 or (at
-your option) any later version.
