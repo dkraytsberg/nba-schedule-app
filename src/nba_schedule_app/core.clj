@@ -15,7 +15,10 @@
 (defn get-schedule [date]
   "queries stats.nba.com and returns the body of the response json parsed as a vector"
   (let [url (str/replace url-template #"%" date)]
-    (client/json-decode (:body (client/get url)))))
+    (try 
+      (client/json-decode (:body (client/get url)))
+        (catch 
+          Exception e (println "server request error -- check your parameters, such as date")))))
 
 
 (defn map-names [schedule]
@@ -53,17 +56,28 @@
         (swap! matchups conj [visit "@" home status (or tv "Local TV")])))
     @matchups))
 
+(defn game-contains-team? [team]
+  (fn [[away at home]] (or (= team away) (= team home))))
+
 
 
 (defn -main
 
   ([]
-   (let [games (get-games (today))]
-     (doseq [g games]
-       (println g))))
-          
-  ([& args]
-   (let [games (get-games (first args))]
-     (doseq [g games]
-       (println g)))))
+    (-main (today)))
+
+  ([date]
+   (let [games (get-games date)]
+     (if (empty? games) 
+       (println "no games scheduled")
+       (doseq [g games]
+         (println g)))))
+
+  ([date team]
+   (let [games (get-games date)
+         team-games (filter (game-contains-team? team) games)]
+     (if (empty? team-games) 
+         (println "no games scheduled")
+           (doseq [g team-games]
+             (println g))))))
 
