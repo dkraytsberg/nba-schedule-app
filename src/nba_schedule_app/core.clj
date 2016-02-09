@@ -43,6 +43,7 @@
     (add-teams west headers teams)
   @teams))
 
+;TODO: get rid of this, replace with "-2"
 (defn get-games [date]
   (let [matchups (atom [])
         schedule (get (get-schedule date) "resultSets")
@@ -115,11 +116,24 @@
     @results))
 
 (defn merge-games-with-scores [games scores]
+  (defn filter-team-scores [requested-id game]
+    (-> (filter #(= (% :team-id) 
+                    (game requested-id)) 
+                scores)
+        (first)
+        (dissoc :game-id :team-id :team)))
   (let [results (atom [])]
     (doseq [game games]
-      (assoc games (filter #(
+      (let [visit-scores (filter-team-scores :visit-id game) 
+            home-scores  (filter-team-scores :home-id game)
+            new-game (-> game
+                      (assoc :visit-scores visit-scores)
+                      (assoc :home-scores home-scores))]
+        (swap! results conj new-game)))
+    @results))
+            
 
-
+;TODO: fix this
 (defn game-contains-team? [team]
   (fn [[away at home]] (or (= team away) (= team home))))
 
